@@ -1,5 +1,5 @@
-#ifndef SMARTMORE_MACHINEID_GENERATOR_H
-#define SMARTMORE_MACHINEID_GENERATOR_H
+#ifndef MACHINEID_GENERATOR_H
+#define MACHINEID_GENERATOR_H
 
 #include <array>
 #include <fstream>
@@ -9,24 +9,6 @@
 
 #include "global_data.h"
 
-// windows
-#if (defined(_WIN32) || defined(_WIN64))
-// for mac address
-#include <winsock2.h>
-#include <iphlpapi.h>
-
-#pragma comment(lib, "IPHLPAPI.lib")
-#pragma comment(lib, "ws2_32.lib")
-// for __cpuid()
-#include <intrin.h>
-
-// for register GUID
-#include <objbase.h>
-#include <stdexcept>
-
-#endif
-// linux
-#if defined(__linux__)
 // for mac
 // for mac address
 #include <arpa/inet.h>
@@ -39,13 +21,10 @@
 
 // for cpu id
 #include <unistd.h>
-#endif
 
 using Byte = unsigned char;
 using Uint32 = unsigned int;
 using Unit64 = unsigned long long;  //NOLINT
-
-namespace smartmore {
 
 class HardwareID {
     // base class of hardware information class
@@ -83,7 +62,5 @@ class MacIdGenerator : public HardwareID {
    public:
     int GetID(std::string &input);
 };
-
-}  // namespace smartmore
 
 #endif

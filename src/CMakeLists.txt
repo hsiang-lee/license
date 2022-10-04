@@ -13,6 +13,7 @@ if (WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/win/*.h
 	)
 	set(MachineInfo ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/win/)
+	set(LibsodiumPath ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/win)
 elseif (APPLE)
 	message(STATUS MacOS)
 	file(GLOB_RECURSE Platform
@@ -21,6 +22,7 @@ elseif (APPLE)
 		${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/mac/*.h
 	)
 	set(MachineInfo ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/mac/)
+	set(LibsodiumPath ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/mac)
 elseif (UNIX)
 	message(STATUS Unix)
 	file(GLOB_RECURSE Platform
@@ -28,13 +30,10 @@ elseif (UNIX)
 		${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/linux/*.h
 	)
 	set(MachineInfo ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/linux/)
+	set(LibsodiumPath ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/linux)
 endif ()
 
 add_library(license ${Srcs} ${Platform})
-
-set_target_properties(license 
-    PROPERTIES
-    CXX_CLANG_TIDY "clang-tidy")
 
 if(NOT DEFINED LICENSE_VERSION)
     set (LICENSE_VERSION $ENV{DRONE_TAG})
@@ -46,15 +45,24 @@ target_compile_definitions(license PRIVATE
 
 target_include_directories(license PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/
-    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/include
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo ${MachineInfo}
+    PRIVATE
+    ${LibsodiumPath}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo
+    ${MachineInfo}
 )
 
-find_library(IOKIT_LIBRARY IOKit)
-find_library(CF_LIBRARY CoreFoundation)
-target_link_libraries(license
-    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/lib/libsodium.a
+target_link_libraries(license PRIVATE
+    ${LibsodiumPath}/lib/libsodium.a
     nlohmann_json::nlohmann_json
     ${IOKIT_LIBRARY}
     ${CF_LIBRARY}
 )
+
+if (APPLE)
+	find_library(IOKIT_LIBRARY IOKit)
+	find_library(CF_LIBRARY CoreFoundation)
+	target_link_libraries(license PRIVATE
+    		${IOKIT_LIBRARY}
+    		${CF_LIBRARY}
+	)
+endif ()
