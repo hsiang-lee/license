@@ -1,0 +1,87 @@
+kind: pipeline
+type: docker
+
+steps:
+  - name: build
+    image: 192.168.100.12:5000/license/builder:v1.1
+    environment:
+      DRONE: "true"
+    commands:
+      - mkdir build
+      - git submodule update --init --recursive --depth 1
+      - cd build
+      - cmake ..
+      - make -j8
+    when:
+      event:
+        - push
+        - pull_request
+        - tag
+
+  - name: upload
+    image: 192.168.100.12:5000/license/builder:v1.1
+    commands:
+      - ./ci-scripts/upload.sh
+    when:
+      event:
+        - tag
+
+  - name: service_image
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+      registry: 192.168.100.12:5000
+      repo: 192.168.100.12:5000/license/smlicense-server
+      dockerfile: service/dockerfile/dockerfile
+      target: smlicenseserver
+      insecure: true
+      custom_dns: 10.80.36.6
+      tags: ${DRONE_TAG}
+    when:
+      event:
+        - tag
+
+trigger:
+  branch:
+    - master
+image_pull_secrets:
+  - dockerconfigjson
+
+---
+kind: pipeline
+type: exec
+name: windows
+
+platform:
+  os: windows
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+  - name: build
+    commands:
+      - git submodule update --init --recursive --depth 1
+      - New-Item .\build -ItemType Directory -ea 0
+      - Set-Location .\build
+      - cmake -G "Visual Studio 16 2019" ..
+      - cmake --build . --config Release
+    when:
+      event:
+        - push
+        - pull_request
+        - tag
+  - name: upload
+    commands:
+      - Remove-Item -Path .\Release\tests.exe -Force
+      - .\ci-scripts\upload.ps1
+    when:
+      event:
+        - tag
+trigger:
+  branch:
+    - master

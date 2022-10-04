@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package smlicense;
+
+// The smlicense service definition.
+service SmlicenseService {
+    rpc GenerateKey(KeyRequest) returns (KeyResponse) {
+        option (google.api.http) = {
+            post : "/v1/smlicense/keygeneration"
+            body : "*"
+        };
+    }
+
+    rpc GenerateLicense(LicenseRequest) returns (LicenseResponse) {
+        option (google.api.http) = {
+            post : "/v1/smlicense/licensegeneration"
+            body : "*"
+        };
+    }
+}
+
+message KeyRequest
+{
+    string RequestID = 1;
+}
+
+message KeyResponse
+{
+    string RequestID = 1;
+    repeated uint32 PubKey = 2;
+    repeated uint32 SecKey = 3;
+}
+
+message LicenseInfo 
+{
+    string AppName = 1;
+    string Issuer = 2;
+    repeated string MachineIDs = 3;
+    uint64 ExpiredTimestamp = 4;
+    map<string, string> Payloads = 5;
+}
+
+//0："成功"、1："无效的参数"、3："内部错误"
+message Status
+{
+    uint32 Code = 1;
+    string Message = 2;
+}
+
+message LicenseRequest
+{
+    string RequestID = 1;
+    LicenseInfo Info = 2;
+    repeated uint32 SecKey = 3;
+}
+
+message LicenseResponse
+{
+    string RequestID = 1;
+    string License = 2;
+    Status Status = 3;
+}

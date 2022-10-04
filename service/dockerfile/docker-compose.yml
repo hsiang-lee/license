@@ -1,0 +1,23 @@
+#  FILENAME:      docker-compose.yml
+#
+#  AUTHORS:       Zheng Huijie    START DATE: Friday December 4th 2020
+#
+#  LAST MODIFIED: Friday, December 4th 2020, 3:02:12 pm
+#
+#  CONTACT:       huijie.zheng@smartmore.com
+version: '3'
+services:
+  smlicense-gateway:
+    image: smlicenseserver:latest
+    container_name: smlicense-gateway
+    network_mode: "host"
+    entrypoint: /gateway
+    restart: always
+    depends_on:
+      - smlicense-grpcserver
+  smlicense-grpcserver:
+    image: smlicenseserver:latest
+    container_name: smlicense-grpcserver
+    network_mode: "host"
+    entrypoint: /smlicense-service
+    restart: always

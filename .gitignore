@@ -1,0 +1,15 @@
+Debug/
+Release/
+build/
+.vscode/
+.cache
+compile_commands.json
+*DS_Store*
+service/gateway/lib/
+
+#generated files
+*.pb.go
+*.pb.gw.go
+*.pb.validate.go
+*.pb.cc
+*.pb.h

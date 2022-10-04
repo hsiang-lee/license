@@ -1,0 +1,35 @@
+FROM 192.168.100.12:5000/license/builder:v1.1 as builder
+
+RUN  echo "deb http://security.ubuntu.com/ubuntu xenial-security main"  >> \
+    /etc/apt/sources.list && apt-get update && apt-get install -y libjpeg-dev \
+    libtiff-dev libjasper-dev libpng-dev libtbb-dev libsodium-dev
+
+#install golang
+RUN wget -qO- http://artifactory.sm/artifactory/golang/go1.15.5.linux-amd64.tar.gz | tar --transform 's/^dbt2-0.37.50.3/dbt2/' -xvz -C /usr/local --strip-components 1
+
+COPY  . /root/go/src/github.com/smartmore/smlicense-service/
+
+RUN cd /root/go/src/github.com/smartmore/smlicense-service/ && \
+    go env -w GO111MODULE=on && \
+    go env -w GOPROXY=https://goproxy.cn,direct && \
+    go get -u github.com/gogo/protobuf/protoc-gen-gofast && \
+    go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway && \
+    export PATH=${PATH}:/root/go/bin && \
+    mkdir tmpbuild && \
+    cd tmpbuild && \
+    cmake -DBUILD_SERVICE=ON -DBUILD_GENERATOR=OFF -DBUILD_TESTS=OFF .. && \
+    make -j8
+
+
+FROM 192.168.100.12:5000/license/builder:v1.1 as smlicenseserver
+
+RUN  echo "deb http://security.ubuntu.com/ubuntu xenial-security main"  >> \
+    /etc/apt/sources.list && apt-get update && apt-get install -y libjpeg-dev \
+    libtiff-dev libjasper-dev libpng-dev libtbb-dev libsodium-dev
+
+ENV LD_LIBRARY_PATH /lib:$LD_LIBRARY_PATH
+# COPY dependencies into /lib
+COPY --from=builder /root/go/src/github.com/smartmore/smlicense-service/tmpbuild/service/gateway /gateway
+COPY --from=builder /root/go/src/github.com/smartmore/smlicense-service/tmpbuild/service/smlicense-service /smlicense-service
+COPY --from=builder /root/go/src/github.com/smartmore/smlicense-service/service/dockerfile/start.sh /start.sh
+ENTRYPOINT [ "/start.sh" ]

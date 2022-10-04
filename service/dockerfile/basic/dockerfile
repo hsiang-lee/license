@@ -1,0 +1,23 @@
+FROM ubuntu:18.04 as grpc-ubuntu
+
+RUN apt-get update && \
+    apt-get install -y wget openssl libssl-dev build-essential autoconf libtool pkg-config git
+
+# install cmake
+RUN cd ~ && \
+    mkdir cmake && \
+    wget -qO- http://192.168.100.12/artifactory/others/cmake-3.19.0.tar.gz | tar --transform 's/^dbt2-0.37.50.3/dbt2/' -xvz -C cmake --strip-components 1 && \
+    cd ~/cmake && \
+    ./configure && \
+    make -j8 install && \
+    cd ~ && \
+    rm -r cmake
+
+# install grpc
+RUN cd ~ && \
+    mkdir grpc && \
+    wget -qO- http://192.168.100.12/artifactory/others/grpc-v1.33.x.tar.gz | tar --transform 's/^dbt2-0.37.50.3/dbt2/' -xvz -C grpc --strip-components 1 && \
+    # git clone --recurse-submodules -b ${GRPC_RELEASE_TAG} https://github.com/grpc/grpc && \
+    cd grpc && \
+    ./test/distrib/cpp/run_distrib_test_cmake.sh && \
+    rm -rf ~/grpc

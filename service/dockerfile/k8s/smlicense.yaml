@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smlic
+  namespace: barcode
+  labels:
+    app: smlicense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smlicense
+  template:
+    metadata:
+      labels:
+        app: smlicense
+    spec:
+      containers:
+      - name: gateway
+        image: 192.168.100.21:5000/smlicenseserver:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /gateway
+        ports:
+        - containerPort: 8081
+        # volumeMounts:
+        #  - name: gatewayVolume
+        #    mountPath: /yaml
+      - name: grpc
+        image: 192.168.100.21:5000/smlicenseserver:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /smlicense-service
+        ports:
+        - containerPort: 3001
+        # volumeMounts:
+        #  - name: grpcVolume
+        #    mountPath: /yaml
+      # volumes:
+      # - name: gatewayVolume
+      #   hostPath:
+      #     path: /dir/to/smlicense.yaml
+      #     type: DirectoryOrCreate
+      # - name: grpcVolume
+      #   hostPath:
+      #     path: /dir/to/smlicense.yaml
+      #     type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smlic
+  namespace: barcode
+spec:
+  selector:
+    app: smlicense
+  ports:
+    - name: gateway
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 30106
+    - name: grpc
+      protocol: TCP
+      port: 3001
+      targetPort: 3001
+      nodePort: 30101
+  type: NodePort
