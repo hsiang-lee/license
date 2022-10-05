@@ -243,9 +243,9 @@ std::string Base64Encode(std::string_view s, bool url) {
     return Encode(s, url);
 }
 
-std::string Base64EncodePem(std::string_view s) { return encode_pem(s); }
+std::string Base64EncodePem(std::string_view s) { return EncodePem(s); }
 
-std::string Base64EncodeMime(std::string_view s) { return encode_mime(s); }
+std::string Base64EncodeMime(std::string_view s) { return EncodeMime(s); }
 
 std::string Base64Decode(std::string_view s, bool remove_linebreaks) {
     return Decode(s, remove_linebreaks);
