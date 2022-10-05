@@ -13,7 +13,7 @@ if (WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/win/*.h
 	)
 	set(MachineInfo ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/win/)
-	set(LibsodiumPath ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/win)
+	set(Libsodium ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/win/x64/Release/v143/static/libsodium.lib)
 elseif (APPLE)
 	message(STATUS MacOS)
 	file(GLOB_RECURSE Platform
@@ -22,7 +22,7 @@ elseif (APPLE)
 		${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/mac/*.h
 	)
 	set(MachineInfo ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/mac/)
-	set(LibsodiumPath ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/mac)
+	set(Libsodium ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/mac/lib/libsodium.a)
 elseif (UNIX)
 	message(STATUS Unix)
 	file(GLOB_RECURSE Platform
@@ -30,7 +30,7 @@ elseif (UNIX)
 		${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/linux/*.h
 	)
 	set(MachineInfo ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo/linux/)
-	set(LibsodiumPath ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/linux)
+	set(Libsodium ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/linux/lib/libsodium.a)
 endif ()
 
 add_library(license ${Srcs} ${Platform})
@@ -41,18 +41,18 @@ endif()
 message(STATUS LICENSE_VERSION=${LICENSE_VERSION})
 
 target_compile_definitions(license PRIVATE
-    LICENSE_VERSION="${LICENSE_VERSION}")
+    LICENSE_VERSION="${LICENSE_VERSION}" SODIUM_STATIC)
 
 target_include_directories(license PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/
     PRIVATE
-    ${LibsodiumPath}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/libsodium/include
     ${CMAKE_CURRENT_SOURCE_DIR}/machineinfo
     ${MachineInfo}
 )
 
 target_link_libraries(license PRIVATE
-    ${LibsodiumPath}/lib/libsodium.a
+    ${Libsodium}
     nlohmann_json::nlohmann_json
     ${IOKIT_LIBRARY}
     ${CF_LIBRARY}
