@@ -42,6 +42,7 @@ message(STATUS LICENSE_VERSION=${LICENSE_VERSION})
 
 target_compile_definitions(license PRIVATE
     LICENSE_VERSION="${LICENSE_VERSION}" SODIUM_STATIC)
+target_compile_options(license PRIVATE -fPIC)
 
 target_include_directories(license PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/

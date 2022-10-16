@@ -1,4 +1,4 @@
-prefix=/home/leehsiang/文档/libsodium
+prefix=/home/leehsiang/Documents/libsodium
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

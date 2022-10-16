@@ -12,8 +12,6 @@ else()
     add_compile_options(-std=c++11) 
 endif()
 
-set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC" )
-
 project(license)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
