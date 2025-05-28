@@ -1,0 +1,31 @@
+[package]
+name = "license-rs"
+version = "0.1.0"
+edition = "2024"
+authors = ["Your Name <your.email@example.com>"]
+description = "License generation and validation system"
+license = "MIT"
+repository = ""
+
+[dependencies]
+base64 = "0.21"
+md-5 = "0.10"
+ring = "0.17"
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+clap = { version = "4.0", features = ["derive"] }
+thiserror = "1.0"
+hex = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winbase", "iphlpapi", "winnt", "ifdef", "iptypes"] }
+
+[target.'cfg(unix)'.dependencies]
+nix = "0.27"
+libc = "0.2"
+
+[features]
+default = []
+windows = []
+unix = []
